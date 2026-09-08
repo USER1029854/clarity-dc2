@@ -65,15 +65,27 @@ only one still fully backed (weight 24.76M == locked 24.76M) because its locks w
 So the deployed delock validator **does not enforce** `weight' = weight − unlocked`. It accepts keeping
 the full weight. That is the bug, and it has already run 37 times in production.
 
-## 4. Correction to the finding's mechanism (does not change the verdict)
+## 4. Mechanism, pinned down on the real bytecode (finding's description holds)
 
-The finding states delock *"leaves F5[1] exactly unchanged; trying to change F5[1] (up **or down**) on
-unlock is rejected."* That "down is rejected" claim is **contradicted** by tx `1ca043e4…` (block
-10598771), a real delock that decremented weight by exactly the unlocked 1,912 CLARITY. The accurate
-statement is: **decrementing weight on delock is *optional*, not forbidden** — the validator accepts both
-`weight' = weight` (37 txs, the abuse) and `weight' = weight − unlocked` (1 tx, honest). An attacker
-simply always chooses to keep the weight. This is a stronger, cleaner statement of the same defect, and
-the finding's proposed fix ("make DELOCK decrement weight — the minimal fix") remains correct.
+I ran the deployed 7,946-byte stake validator `08921c4b` in the UPLC CEK machine against the
+reconstructed `ScriptContext` of a real delock tx (`6a2a55a2`, freeing 5,000,000 CLARITY) and did a
+differential on the output weight (`audit/poc/verify_bytecode.py`, GATE 1):
+
+- output weight **KEPT** (unchanged) → **ACCEPT**
+- output weight **reduced** by the unlocked amount → **REJECT**
+- output weight increased / zeroed → **REJECT**
+
+So in the ordinary (expired-lock) delock, the validator **forces the weight to stay** — you free the
+collateral and *cannot* reduce the weight. That matches the finding's claim ("leaves F5[1] unchanged;
+changing it up or down is rejected"). A single atypical tx (`1ca043e4`) did decrement on redeemer 2, and
+running *its* context shows that context accepts both keep and decrement — so "decrement is always
+forbidden" is slightly too strong. The invariant that actually holds on the real code, and is all the
+exploit needs: **keeping the weight while freeing the collateral is ALWAYS accepted** (proven on real
+bytecode in both contexts; 37 real mainnet delocks did it). The proposed fix — make delock decrement
+`F5[1]` by the unlocked amount — is correct.
+
+(This supersedes an earlier draft note that called the decrement merely "optional"; the real-bytecode
+differential shows keeping is not just allowed but, in the common case, mandatory.)
 
 ## 5. The weight is actually usable, and it reaches the money
 

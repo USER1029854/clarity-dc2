@@ -20,6 +20,11 @@
 #
 # Run:  python3 poc.py          (pure-python, no network needed)
 #       python3 poc.py --live   (re-reads the pinned figures from Koios first)
+#
+# What is simulated vs. what an attacker does on mainnet: see MAINNET_VS_FORK.md.
+# The two custody gates below (delock-keeps-weight, GAT-burn-drains-treasury) are
+# run on the REAL deployed bytecode by verify_bytecode.py; here they are the
+# value-conserving ledger that chains them into a wallet run.
 # =============================================================================
 import sys, json, urllib.request
 
@@ -133,9 +138,11 @@ class Ledger:
     def delock_keep_weight(self, clar_raw):
         """
         DELOCK (deployed stake validator redeemer 2). Removes the lock so the
-        position is withdrawable again -- but the validator does NOT require
-        F5[1] to decrease, so we keep the full weight. This is exactly what the
-        deployed validator accepted in 37 real mainnet txs (REAL_DELOCKS).
+        position is withdrawable again while the stake KEEPS its full weight.
+        verify_bytecode.py GATE 1 runs the real 08921c4b validator on a real
+        delock context and shows it ACCEPTS keeping the weight (and, in that
+        context, REJECTS reducing it -> weight is a forced ratchet). 37 real
+        mainnet delock txs (REAL_DELOCKS) already did exactly this.
         Value conserved: CLARITY stays in the pool position (still ours);
         the weight counter is left untouched (the bug).
         """
