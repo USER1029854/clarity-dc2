@@ -1,6 +1,16 @@
+> # ⚠️ RETRACTED — THIS VERDICT IS WRONG. See `RETRACTION.md`.
+> This "CONFIRMED" conclusion is a **false positive from a component misidentification**:
+> `08921c4b` is the Agora **Proposal** validator (its `F5[1]` is a proposal's *vote tally*),
+> not a stake with recyclable weight. Every vote is backed by real staked CLARITY (61/61
+> verified), and a preserved tally exists only on Finished proposals, which can't accept new
+> votes. **There is no recyclable-voting-weight vulnerability.** The text below is kept only as
+> a record of the mistake; do not act on it.
+
+---
+
 # Verification — "Governance capture via recyclable voting weight" (Clarity, Cardano)
 
-**Verdict: CONFIRMED (real, live, exploitable).** Independently reproduced against the live
+**Verdict: CONFIRMED (real, live, exploitable).** — ❌ RETRACTED, see banner above and `RETRACTION.md`. Independently reproduced against the live
 Cardano mainnet deployment (Koios + on-chain bytecode), pinned at **block 13,914,607 / epoch 654
 (Conway), slot 197,311,244**. The finding's root cause, contract set, live numbers and value-at-risk
 all check out. One mechanistic detail in the finding is imprecise (see §4) — but the correction makes

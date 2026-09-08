@@ -1,4 +1,17 @@
-# PoC — Clarity governance capture (recyclable voting weight → treasury drain)
+> # ⚠️ RETRACTED — this PoC demonstrates a NON-bug. See `../RETRACTION.md`.
+> The "recyclable voting weight" premise is a component misidentification: `08921c4b` is the
+> Agora **Proposal** validator, so `F5[1]` is a proposal's **vote tally** (every increase is
+> backed by real staked CLARITY — verified 61/61), not a per-owner weight. `verify_bytecode.py`
+> GATE 1 ran `PUnlock` on a **Finished** proposal, where keeping the frozen tally is *correct*;
+> you cannot `PVote` on a finished proposal, so the preserved tally is inert. `poc.py`'s
+> "3,100 ADA → +$38k" recycle **cannot happen on mainnet.** Kept only as a record.
+>
+> `verify_onchain.py` is still useful — but read it now as *disproving* the finding
+> (it decodes the ProposalDatum and shows the tally/lock numbers are a category mismatch).
+
+---
+
+# ~~PoC — Clarity governance capture (recyclable voting weight → treasury drain)~~ (RETRACTED)
 
 One attacker wallet goes from **3,100 ADA (~$687)** to **~175,000 ADA (~$38k realized)**
 using only recoverable capital. The exploit chain and each gate's grounding:

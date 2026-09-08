@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # =============================================================================
-# Clarity (Cardano) — Governance-capture PoC
+# ⚠️  RETRACTED — DEMONSTRATES A NON-BUG.  See ../RETRACTION.md
+# The premise (08921c4b F5[1] = recyclable per-owner weight) is a component
+# misidentification: 08921c4b is the Agora PROPOSAL validator and F5[1] is a
+# proposal's VOTE TALLY. Every vote is backed by real staked CLARITY (verified
+# 61/61), and you cannot PVote on a Finished proposal, so the "recycle" below
+# is impossible on mainnet. This file is kept only as a record of the mistake.
+# =============================================================================
+# Clarity (Cardano) — Governance-capture PoC   [RETRACTED]
 # "Recyclable voting weight" -> quorum -> GAT -> treasury drain -> DEX dump
 #
 # Wallet starts with 3,100 ADA and ends ~+$37k, using only recoverable capital.
