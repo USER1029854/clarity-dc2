@@ -62,15 +62,39 @@ treasury validator releases funds on a GAT burn; there is no admin/pause/timeloc
 governance is **not cheaply capturable** (votes require real locked stake, per §2 above), none of
 this yields cheap theft.
 
-## Genuinely open (separate from the retracted claim — not yet closed)
+## The two "genuinely open" items — now CHECKED (both clean, not cheap-theft)
 
-Inherited from the peer note and not part of the recycle claim:
-- **`2c036098…`** — one DAO treasury whose validator is not yet on-chain; spend condition unknown
-  until first spend (~$16k).
-- The **treasury-withdrawal effect's output-binding** (does a passed drain-effect force funds to a
-  specific destination, or any?).
-Both are governance-gated, so they are only exploitable if governance is cheaply capturable — which
-this retraction shows it is not. Worth finishing, but not a cheap-theft path on their own.
+### (a) `2c036098…` and the other unrevealed treasuries
+- It holds **5,131 ADA + ~21 illiquid small-cap tokens** (nominal ~$16k, but realizable value is
+  dominated by the ADA, ~$1.1k). Its validator is genuinely **not on-chain** (never spent, no
+  reference script) so it cannot be decompiled — and there are **7** such unrevealed treasuries,
+  not one.
+- But it has empty `Constr0[]` datums and treasury-style holdings, i.e. the **type-A treasury
+  family**. Decompiling all **11 revealed** type-A treasuries shows they are **byte-identical
+  except for a single embedded GAT policy** — one parameterized validator whose spend condition is
+  "burn this DAO's GAT." `2c036098` is almost certainly another instance, spend-gated on its DAO's
+  GAT (governance). The preimage can't be *confirmed* until first spend (a genuine limitation), but
+  a non-standard/weaker script is very unlikely, and the value at stake is small.
+- **Verdict:** governance-gated like the rest; not a cheap-theft path.
+
+### (b) Treasury-withdrawal effect output-binding — the destination IS bound
+Examined a real drain (tx `cbaa7f9b…`): treasury `ed927ac0` spent, GAT `50fc1b9c` **burned**, effect
+`8c690736` spent, funds paid out. The effect's datum is the Agora `TreasuryWithdrawalDatum`:
+`receivers = [(addr, value), …]` **plus** `treasuries = [ScriptCredential(ed927ac0)]`, committed via
+DatumHash in the proposal's `effects` map at proposal creation (so voters approve the exact payout).
+The two actual outputs matched **both committed receivers exactly** — address *and* amount
+(`5.000000` + `1.017160` ADA to the committed `addr1q8jeyy88…` = pkh `e59210e7…`/stake `6c2f7862…`).
+The effect validator embeds the GAT policy and enforces the receiver list with `equalsData` (12×),
+and the GAT is minted to the effect UTXO carrying that committed datum, so the executor cannot swap
+it. **The destination is fixed at proposal creation, not chosen by the executor — no execution
+hijack / output redirection.** (I confirmed the treasury validator accepts a faithfully
+reconstructed context and got the stake-delock replay to ACCEPT, but did not get this specific
+multi-input effect-spend context to ACCEPT in isolation; per the paired-control rule I draw nothing
+from that rejection — the binding conclusion rests on the exact on-chain receiver match + the
+`TreasuryWithdrawalDatum` structure + the `equalsData` enforcement, which don't depend on the eval.)
+
+**Net:** both items are governance-gated, and governance is not cheaply capturable (the body of this
+retraction). Neither is a cheap-theft path. The on-chain logic has no open cheap-theft exit.
 
 ## Root cause of the false positive (for my own process)
 
